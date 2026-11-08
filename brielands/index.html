@@ -176,7 +176,7 @@ footer .fine { margin-top: 26px; font-weight: 700; opacity: .75; }
       <button class="btn big" data-play>▶ PLAY FREE</button>
       <button class="btn big blue" data-blank>Open in about:blank</button>
     </div>
-    <p class="small">Runs right in your browser. No download. ~40 MB the first time. <a href="https://noirpixels.github.io/Pyrevalley/brielands/v1.original/" target="_blank">Play the original (v1)</a></p>
+    <p class="small">Runs right in your browser. No download. ~40 MB the first time.</p>
   </div>
   <svg class="drip" viewBox="0 0 1440 70" preserveAspectRatio="none" aria-hidden="true">
     <path fill="#1b1020" d="M0,40 C80,40 90,70 140,66 C190,62 180,30 250,30 C320,30 300,58 380,60 C460,62 450,25 540,28
@@ -300,7 +300,7 @@ footer .fine { margin-top: 26px; font-weight: 700; opacity: .75; }
   }
   // game night? (posted by the host's "Game night.command")
   function gnGet(u) { return fetch(u + "?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); }
-  Promise.all([gnGet("https://noirpixels.github.io/Pyrevalley/brielands/gamenight.json"), gnGet("https://cdn.jsdelivr.net/gh/noirpixels/Pyrevalley@gh-pages/brielands/gamenight.json")]).then(function (all) {
+  Promise.all([gnGet("https://noirpixels.github.io/brielands/gamenight.json"), gnGet("https://cdn.jsdelivr.net/gh/noirpixels/noirpixels.github.io@main/brielands/gamenight.json")]).then(function (all) {
     var d = all.filter(function (x) { return x && x.live && x.until * 1000 > Date.now(); })[0];
     if (!d) return;
     document.getElementById("gn-url").textContent = d.url;
