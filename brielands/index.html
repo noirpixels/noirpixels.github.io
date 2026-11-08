@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brielands: you are the cheese</title>
+<meta name="description" content="A free survival game where you play as a wedge of cheese. Don't melt. Don't freeze. Play in your browser.">
+<style>
+:root {
+  --cheese: #ffc94a; --cheese2: #ffb02f; --deep: #f08a1c; --ink: #2a1420; --cream: #fff4dc;
+  --plum: #1b1020; --plum2: #26172d; --nacho: #ff9d1e; --bleu: #74a8ff; --green: #7fcf5a;
+  --r: 22px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--plum); color: var(--cream);
+  font-family: ui-rounded, "Nunito", "Trebuchet MS", "Segoe UI", system-ui, sans-serif; line-height: 1.5; }
+a { color: var(--cheese); }
+img { display: block; max-width: 100%; }
+
+/* chunky cheese buttons, like the game's UI */
+.btn { display: inline-flex; align-items: center; gap: 10px; font: inherit; font-weight: 900;
+  font-size: 20px; padding: 14px 26px; border: 4px solid var(--ink); border-radius: 18px;
+  background: var(--cheese); color: var(--ink); text-decoration: none; cursor: pointer;
+  box-shadow: 0 6px 0 var(--ink); transition: transform .08s, box-shadow .08s, filter .15s; }
+.btn:hover { filter: brightness(1.06); transform: translateY(-2px); box-shadow: 0 8px 0 var(--ink); }
+.btn:active { transform: translateY(5px); box-shadow: 0 1px 0 var(--ink); }
+.btn.big { font-size: 28px; padding: 18px 40px; border-radius: 22px; }
+.btn.blue { background: #a9d4ff; }
+.btn.ghost { background: transparent; color: var(--cream); border-color: var(--cream); box-shadow: 0 6px 0 #0006; }
+
+/* nav */
+nav { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 22px;
+  padding: 10px 28px; background: #1b1020e6; backdrop-filter: blur(8px); border-bottom: 3px solid var(--ink); }
+nav .logo { font-weight: 900; font-size: 22px; letter-spacing: 2px; color: var(--cheese);
+  text-shadow: 0 3px 0 var(--ink); text-decoration: none; margin-right: auto; }
+nav a.link { color: var(--cream); text-decoration: none; font-weight: 800; opacity: .85; }
+nav a.link:hover { opacity: 1; color: var(--cheese); }
+nav .btn { font-size: 16px; padding: 7px 16px; border-width: 3px; box-shadow: 0 4px 0 var(--ink); }
+
+/* game night banner */
+.gn { display: none; position: sticky; top: 58px; z-index: 19; padding: 12px 20px; text-align: center; font-weight: 900;
+  background: #ff6a55; color: var(--ink); border-bottom: 3px solid var(--ink); }
+.gn.on { display: block; }
+.gn .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #fff; margin-right: 8px;
+  box-shadow: 0 0 0 3px var(--ink); animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: .2; } }
+.gn code { background: var(--cream); padding: 2px 8px; border-radius: 8px; border: 2px solid var(--ink); font-size: 14px; }
+.gn button { font: inherit; font-size: 14px; margin-left: 6px; padding: 3px 10px; border: 2px solid var(--ink); border-radius: 8px; background: var(--cheese); cursor: pointer; }
+
+/* hero */
+.hero { position: relative; min-height: min(88vh, 820px); display: grid; place-items: center; text-align: center;
+  padding: 80px 20px 120px; overflow: hidden; isolation: isolate; }
+.hero .bg { position: absolute; inset: 0; z-index: -2; background: center/cover no-repeat;
+  transform: scale(1.06); animation: drift 30s ease-in-out infinite alternate; }
+.hero::after { content: ""; position: absolute; inset: 0; z-index: -1;
+  background: radial-gradient(ellipse at 50% 40%, #1b102000 0%, #1b102099 55%, #1b1020 100%),
+              linear-gradient(#1b102055, #1b102000 40%, #1b1020 98%); }
+@keyframes drift { to { transform: scale(1.14) translate(-1.5%, 1%); } }
+.title { position: relative; display: inline-block; margin: 0; font-size: clamp(44px, 13vw, 168px);
+  font-weight: 900; letter-spacing: .04em; line-height: .95; color: var(--cheese);
+  text-shadow: 0 4px 0 var(--deep), 0 9px 0 var(--ink), 0 0 60px #ffb02f66;
+  -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; }
+.sticker { position: absolute; top: -6px; right: -54px; transform: rotate(14deg); font-size: 30px;
+  font-weight: 900; color: var(--ink); background: var(--cheese); border: 4px solid var(--ink);
+  border-radius: 999px; padding: 2px 16px; -webkit-text-stroke: 0; text-shadow: none; box-shadow: 0 4px 0 var(--ink); }
+.tag { margin: 26px auto 34px; font-size: clamp(18px, 2.6vw, 26px); font-weight: 800; max-width: 760px;
+  text-shadow: 0 2px 0 var(--ink); }
+.actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.small { font-size: 14px; opacity: .75; margin-top: 18px; }
+.drip { position: absolute; left: 0; right: 0; bottom: -1px; height: 70px; z-index: 1; }
+
+/* sections */
+section { padding: 90px 24px; }
+.wrap { max-width: 1160px; margin: 0 auto; }
+h2 { font-size: clamp(34px, 5vw, 54px); margin: 0 0 10px; font-weight: 900; color: var(--cheese);
+  text-shadow: 0 4px 0 var(--ink); letter-spacing: .02em; }
+.lead { font-size: 20px; opacity: .9; max-width: 720px; margin: 0 0 40px; }
+.alt { background: var(--plum2); }
+.center { text-align: center; } .center .lead { margin-left: auto; margin-right: auto; }
+
+/* features */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 26px; }
+.card { background: #2f1d36; border: 4px solid var(--ink); border-radius: var(--r); overflow: hidden;
+  box-shadow: 0 8px 0 var(--ink); transition: transform .2s; }
+.card:hover { transform: translateY(-6px) rotate(-.4deg); }
+.card img { aspect-ratio: 16/9; object-fit: cover; width: 100%; border-bottom: 4px solid var(--ink); }
+.card .txt { padding: 18px 22px 22px; }
+.card h3 { margin: 0 0 6px; font-size: 24px; color: var(--cheese); }
+.card p { margin: 0; opacity: .9; }
+.card.wide { grid-column: 1 / -1; display: grid; grid-template-columns: 1.3fr 1fr; align-items: center; }
+.card.wide img { border-bottom: 0; border-right: 4px solid var(--ink); height: 100%; }
+.card.wide .txt { padding: 26px 34px; } .card.wide h3 { font-size: 34px; } .card.wide p { font-size: 18px; }
+
+/* before / after */
+.compare { position: relative; border: 5px solid var(--ink); border-radius: var(--r); overflow: hidden;
+  box-shadow: 0 10px 0 var(--ink); aspect-ratio: 1280/533; user-select: none; touch-action: none; cursor: ew-resize; }
+.compare img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.compare .after { clip-path: inset(0 0 0 50%); }
+.compare .bar { position: absolute; top: 0; bottom: 0; left: 50%; width: 6px; margin-left: -3px; background: var(--cheese);
+  box-shadow: 0 0 0 3px var(--ink); }
+.compare .knob { position: absolute; top: 50%; left: 50%; width: 54px; height: 54px; margin: -27px 0 0 -27px;
+  border-radius: 50%; background: var(--cheese); border: 4px solid var(--ink); display: grid; place-items: center;
+  font-weight: 900; color: var(--ink); font-size: 20px; }
+.compare .lbl { position: absolute; top: 14px; font-weight: 900; padding: 4px 14px; border-radius: 999px;
+  border: 3px solid var(--ink); color: var(--ink); }
+.compare .lbl.l { left: 14px; background: #ff9d8a; } .compare .lbl.r { right: 14px; background: var(--cheese); }
+
+/* multiplayer */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+.mode { background: #2f1d36; border: 4px solid var(--ink); border-radius: var(--r); box-shadow: 0 8px 0 var(--ink); overflow: hidden; }
+.mode img { border-bottom: 4px solid var(--ink); }
+.mode .txt { padding: 20px 24px 24px; }
+.mode h3 { margin: 0 0 8px; font-size: 28px; }
+.mode ul { margin: 8px 0 0; padding-left: 20px; }
+.pill { display: inline-block; font-weight: 900; font-size: 14px; padding: 2px 12px; border-radius: 999px;
+  border: 3px solid var(--ink); color: var(--ink); margin-right: 6px; }
+.note { margin-top: 26px; padding: 16px 20px; border-radius: 16px; background: #ffc94a1a; border: 3px dashed #ffc94a77; }
+
+/* video */
+.video { border: 5px solid var(--ink); border-radius: var(--r); overflow: hidden; box-shadow: 0 10px 0 var(--ink); background: #000; }
+.video video { display: block; width: 100%; }
+
+/* controls */
+.keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px 30px; }
+.key { display: flex; align-items: center; gap: 14px; font-weight: 700; }
+kbd { min-width: 44px; text-align: center; font: 900 15px ui-monospace, Menlo, monospace; padding: 8px 10px;
+  border-radius: 10px; background: var(--cream); color: var(--ink); border: 3px solid var(--ink); box-shadow: 0 4px 0 var(--ink); }
+
+/* swiss holes */
+.holes { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.holes i { position: absolute; border-radius: 50%; background: #00000022; box-shadow: inset 0 6px 0 #00000033; }
+
+footer { padding: 50px 24px 70px; text-align: center; background: var(--cheese); color: var(--ink); position: relative; }
+footer .big { font-size: 34px; font-weight: 900; margin: 0 0 8px; }
+footer .btn { box-shadow: 0 6px 0 var(--ink); }
+footer .fine { margin-top: 26px; font-weight: 700; opacity: .75; }
+
+/* the game itself, on top of everything */
+#game { position: fixed; inset: 0; z-index: 100; display: none; background: #000; }
+#game iframe, #game canvas { width: 100%; height: 100%; border: 0; display: block; }
+#game .close { position: absolute; top: 10px; right: 10px; z-index: 2; font-size: 14px; padding: 6px 12px;
+  border-width: 3px; box-shadow: 0 3px 0 var(--ink); opacity: .65; }
+#game .close:hover { opacity: 1; }
+
+@media (max-width: 800px) {
+  nav a.link { display: none; }
+  .split { grid-template-columns: 1fr; }
+  .card.wide { grid-template-columns: 1fr; } .card.wide img { border-right: 0; border-bottom: 4px solid var(--ink); }
+  .sticker { right: -18px; top: -26px; font-size: 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .hero .bg { animation: none; } * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#top">🧀 BRIELANDS</a>
+  <a class="link" href="#features">Features</a>
+  <a class="link" href="#compare">v1 vs v2</a>
+  <a class="link" href="#multiplayer">Multiplayer</a>
+  <a class="link" href="#devlog">Devlog</a>
+  <a class="link" href="#controls">Controls</a>
+  <button class="btn" data-play>▶ Play</button>
+</nav>
+
+<div class="gn" id="gn"><span class="dot"></span>GAME NIGHT IS LIVE! Press Play, then <u>Multiplayer</u>: the server fills in by itself.
+  <span class="small" style="opacity:1">Or paste: <code id="gn-url"></code><button id="gn-copy">Copy</button></span></div>
+
+<header class="hero" id="top">
+  <div class="bg" style="background-image:url('site/img/after_v2.jpg')"></div>
+  <div>
+    <h1 class="title">BRIELANDS<span class="sticker">v2</span></h1>
+    <p class="tag">You are the cheese. Don't melt. Don't freeze.<br>Forge, build, get rich in Brie City, and fight your friends.</p>
+    <div class="actions">
+      <button class="btn big" data-play>▶ PLAY FREE</button>
+      <button class="btn big blue" data-blank>Open in about:blank</button>
+    </div>
+    <p class="small">Runs right in your browser. No download. ~40 MB the first time. <a href="https://noirpixels.github.io/Pyrevalley/brielands/v1.original/" target="_blank">Play the original (v1)</a></p>
+  </div>
+  <svg class="drip" viewBox="0 0 1440 70" preserveAspectRatio="none" aria-hidden="true">
+    <path fill="#1b1020" d="M0,40 C80,40 90,70 140,66 C190,62 180,30 250,30 C320,30 300,58 380,60 C460,62 450,25 540,28
+      C630,31 610,64 700,62 C790,60 770,22 870,26 C970,30 940,66 1040,64 C1140,62 1120,30 1210,32 C1300,34 1290,60 1370,58
+      C1420,57 1430,44 1440,40 L1440,70 L0,70 Z"/>
+  </svg>
+</header>
+
+<section id="features">
+  <div class="wrap">
+    <h2>The cheesiest survival game</h2>
+    <p class="lead">Everything is cheese: the trees are breadsticks, the rocks are aged cheddar, the river is nacho sauce, and you are a very worried wedge.</p>
+    <div class="grid">
+      <div class="card"><img loading="lazy" src="site/img/melting.jpg" alt="Colby melting by a campfire">
+        <div class="txt"><h3>🔥 Don't melt</h3><p>Fire keeps you warm... until you droop, drip and puddle. Noon sun softens you. Nights freeze you solid.</p></div></div>
+      <div class="card"><img loading="lazy" src="site/img/nacho_river.jpg" alt="The nacho cheese river">
+        <div class="txt"><h3>🌶️ The nacho river</h3><p>A river of warm nacho sauce. It heals you, but you come out sticky. Scoop it up to make nacho cement.</p></div></div>
+      <div class="card"><img loading="lazy" src="site/img/cheese_god.jpg" alt="Gouda the Golden, a cheese god">
+        <div class="txt"><h3>👑 The cheese gods</h3><p>Crafting isn't a menu. The cheese gods greet you by name and judge you: strike, stir and stretch your way to Blessed gear.</p></div></div>
+      <div class="card"><img loading="lazy" src="site/img/forge_night.jpg" alt="The forge at night">
+        <div class="txt"><h3>⚒️ The Fondue Forge</h3><p>Melt curds in a fondue cauldron, hammer them on a pastry slab, quench in ghee, cave-age the best. Two hands, two weapons.</p></div></div>
+      <div class="card"><img loading="lazy" src="site/img/build.jpg" alt="A cheddar block wall">
+        <div class="txt"><h3>🧱 Build anything</h3><p>Cheddar blocks go anywhere (and melt near fire). Nacho cement sets rock hard and glues them together.</p></div></div>
+      <div class="card"><img loading="lazy" src="site/img/caldera.jpg" alt="A fondue caldera">
+        <div class="txt"><h3>🌍 An endless world</h3><p>Whey Marsh, Parmesan Peaks, the Moldwoods, Fondue Fields and bubbling Fondue Calderas. Keep walking. It keeps going.</p></div></div>
+      <div class="card wide"><img loading="lazy" src="site/img/city.jpg" alt="The gates of Brie City">
+        <div class="txt"><h3>💰 Brie City</h3><p>Buy land, run farms and fondue restaurants, sell Blessed blades at the forge shop. Beat Count Camembert and the copycat rats. Become THE BIG CHEESE.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="compare" class="alt">
+  <div class="wrap center">
+    <h2>Then vs now</h2>
+    <p class="lead">Same village, same cheese. Drag the slider.</p>
+    <div class="compare" id="cmp">
+      <img src="site/img/before_v1.jpg" alt="Brielands v1">
+      <img class="after" src="site/img/after_v2.jpg" alt="Brielands v2">
+      <span class="lbl l">v1</span><span class="lbl r">v2</span>
+      <div class="bar"></div><div class="knob">⇆</div>
+    </div>
+  </div>
+</section>
+
+<section id="multiplayer">
+  <div class="wrap">
+    <h2>Fight your friends</h2>
+    <p class="lead">Bring the gear from your adventure: your best weapon, your shield, your armour. Then see whose cheese is sharper.</p>
+    <div class="split">
+      <div class="mode"><img loading="lazy" src="site/img/arena.jpg" alt="An arena match">
+        <div class="txt"><h3>⚔️ Arenas</h3>
+          <p><span class="pill" style="background:var(--cheese)">Team Cheddar</span> vs <span class="pill" style="background:var(--bleu)">Team Bleu</span></p>
+          <ul><li>1v1, 2v2, 3v3 or 4v4</li><li>Quick match with random players, or a private room code for your friends</li>
+          <li>Three arenas: Cracker Colosseum, Fondue Pit (fall in, you melt), Whey Marsh</li>
+          <li>The host picks rounds, time, health, gear and friendly fire</li></ul></div></div>
+      <div class="mode"><img loading="lazy" src="site/img/ffa.jpg" alt="The free-for-all world">
+        <div class="txt"><h3>🧀 Free-for-all world</h3>
+          <p>Up to 16 cheeses in the real Curdlands. Everyone vs everyone.</p>
+          <ul><li>Team up with friends... until you don't</li><li>Nacho Cups, Golden Graters and Mozzarella Boots to grab</li>
+          <li>KO streaks and the Big Cheese crown</li><li>Quick chat: GG! Nice hit! Say cheese!</li></ul></div></div>
+    </div>
+    <p class="note">🔴 <b>Multiplayer happens on GAME NIGHTS.</b> When one is live, a red banner shows up at the top of this page,
+      and the game connects by itself: press Play, then <b>Multiplayer</b>. Watch the YouTube channel for the next one!</p>
+  </div>
+</section>
+
+<section id="devlog" class="alt">
+  <div class="wrap center">
+    <h2>The devlog</h2>
+    <p class="lead">How Brielands went from "kind of ugly" to this, in under two minutes.</p>
+    <div class="video"><video controls preload="none" poster="site/img/melting.jpg" src="site/devlog.mp4"></video></div>
+  </div>
+</section>
+
+<section id="controls">
+  <div class="wrap">
+    <h2>How to play</h2>
+    <p class="lead">Keep your temperature in the green: cheese is comfy at 10 °Ré. Too hot and you melt, too cold and you crack.</p>
+    <div class="keys">
+      <div class="key"><kbd>WASD</kbd> move</div>
+      <div class="key"><kbd>Space</kbd> jump</div>
+      <div class="key"><kbd>Shift</kbd> roll like a cheese wheel</div>
+      <div class="key"><kbd>L-click</kbd> left hand</div>
+      <div class="key"><kbd>R-click</kbd> right hand</div>
+      <div class="key"><kbd>X</kbd> swap hands</div>
+      <div class="key"><kbd>1-9</kbd> pick a tool</div>
+      <div class="key"><kbd>E</kbd> use / talk</div>
+      <div class="key"><kbd>Tab</kbd> crafting (the cheese gods)</div>
+      <div class="key"><kbd>F</kbd> eat</div>
+      <div class="key"><kbd>Q</kbd> throw</div>
+      <div class="key"><kbd>Esc</kbd> pause</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="holes" aria-hidden="true"><i style="width:90px;height:70px;left:6%;top:20%"></i><i style="width:46px;height:40px;left:18%;top:65%"></i>
+    <i style="width:120px;height:90px;right:8%;top:30%"></i><i style="width:36px;height:30px;right:24%;top:70%"></i><i style="width:60px;height:50px;left:40%;top:10%"></i></div>
+  <div style="position:relative">
+    <p class="big">Ready to get grated?</p>
+    <button class="btn big" data-play style="background:var(--cream)">▶ PLAY BRIELANDS</button>
+    <p class="fine">Made in Godot, everything built in code. A game by noirpixels. 🧀</p>
+  </div>
+</footer>
+
+<div id="game"><button class="btn close" id="close">✕ Back to the site</button></div>
+
+<script>
+(function () {
+  // before/after slider
+  var cmp = document.getElementById("cmp");
+  if (cmp) {
+    var after = cmp.querySelector(".after"), bar = cmp.querySelector(".bar"), knob = cmp.querySelector(".knob"), drag = false;
+    function set(x) {
+      var r = cmp.getBoundingClientRect(), p = Math.max(0, Math.min(1, (x - r.left) / r.width)) * 100;
+      after.style.clipPath = "inset(0 0 0 " + p + "%)"; bar.style.left = knob.style.left = p + "%";
+    }
+    cmp.addEventListener("pointerdown", function (e) { drag = true; cmp.setPointerCapture(e.pointerId); set(e.clientX); });
+    cmp.addEventListener("pointermove", function (e) { if (drag) set(e.clientX); });
+    cmp.addEventListener("pointerup", function () { drag = false; });
+  }
+  // game night? (posted by the host's "Game night.command")
+  function gnGet(u) { return fetch(u + "?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); }
+  Promise.all([gnGet("https://noirpixels.github.io/Pyrevalley/brielands/gamenight.json"), gnGet("https://cdn.jsdelivr.net/gh/noirpixels/Pyrevalley@gh-pages/brielands/gamenight.json")]).then(function (all) {
+    var d = all.filter(function (x) { return x && x.live && x.until * 1000 > Date.now(); })[0];
+    if (!d) return;
+    document.getElementById("gn-url").textContent = d.url;
+    document.getElementById("gn").classList.add("on");
+    document.getElementById("gn-copy").onclick = function () { navigator.clipboard && navigator.clipboard.writeText(d.url); this.textContent = "Copied!"; };
+  });
+  var game = document.getElementById("game");
+  document.getElementById("close").onclick = function () { location.reload(); };
+  
+  var gameUrl = new URL("files/index.html", location.href).href;
+  function playHere() {
+    var f = document.createElement("iframe");
+    f.src = gameUrl; f.allow = "fullscreen; autoplay; gamepad"; f.allowFullscreen = true;
+    game.appendChild(f); game.style.display = "block"; document.body.style.overflow = "hidden"; f.focus();
+  }
+  function playBlank() {
+    var w = window.open("about:blank", "_blank");
+    if (!w) { alert("Your browser blocked the new tab. Allow pop-ups, or use Play."); return; }
+    w.document.title = "Brielands";
+    var s = w.document.body.style; s.margin = "0"; s.height = "100vh"; s.overflow = "hidden"; s.background = "#000";
+    var f = w.document.createElement("iframe");
+    f.src = gameUrl; f.setAttribute("allow", "fullscreen; autoplay; gamepad"); f.allowFullscreen = true;
+    f.style.cssText = "border:0;width:100%;height:100%;display:block";
+    w.document.body.appendChild(f);
+  }
+  document.querySelectorAll("[data-play]").forEach(function (b) { b.onclick = playHere; });
+  document.querySelectorAll("[data-blank]").forEach(function (b) { b.onclick = playBlank; });
+})();
+</script>
+</body>
+</html>
