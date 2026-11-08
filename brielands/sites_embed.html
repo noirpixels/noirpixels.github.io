@@ -6,12 +6,12 @@
 <div id="bl-status" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;font:600 20px system-ui,sans-serif;background:radial-gradient(ellipse at 50% 120%,#ffb02f55,transparent 60%),linear-gradient(#1d2a50,#0c1226)">
   <div style="font-size:56px;color:#ffc94a;text-shadow:0 4px 0 #2a1420">BRIELANDS</div>
   <div id="bl-msg">Loading the cheese... (about 40 MB)</div>
-  <progress id="bl-bar" style="width:320px;height:14px"></progress>
+  <progress id="bl-bar" style="width:320px;height:14px"></progress> 
 </div>
 </div>
 <script>
 (function () {
-  var BASE = "https://cdn.jsdelivr.net/gh/noirpixels/noirpixels.github.io@4856d3c0e8120940a766bf9bbebe43194ff24677/brielands/files";
+  var BASE = "https://cdn.jsdelivr.net/gh/noirpixels/Pyrevalley@4db58348359d1d6e80afdb0a4de2a39036dc8c39/brielands/files";
   var msg = document.getElementById("bl-msg"), bar = document.getElementById("bl-bar");
   function fail(e) { console.error(e); msg.textContent = "Couldn't load: " + (e && e.message ? e.message : e); bar.style.display = "none"; }
   // Join the two halves of the engine whenever Godot asks for index.wasm.
@@ -42,7 +42,7 @@
   s.onerror = function () { fail("couldn't reach cdn.jsdelivr.net (is it blocked?)"); };
   s.onload = function () {
     var engine = new Engine({ args: [], canvasResizePolicy: 2, executable: BASE + "/index", focusCanvas: true,
-      fileSizes: { "index.pck": 620048, "index.wasm": 39514754 }, experimentalVK: false, gdextensionLibs: [] });
+      fileSizes: { "index.pck": 620384, "index.wasm": 39514754 }, experimentalVK: false, gdextensionLibs: [] });
     var missing = Engine.getMissingFeatures({ threads: false });
     if (missing.length) { fail("this browser is missing: " + missing.join(", ")); return; }
     engine.startGame({ onProgress: function (c, t) { if (c > 0 && t > 0) { bar.value = c; bar.max = t; } } })
